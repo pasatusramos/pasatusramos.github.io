@@ -133,6 +133,7 @@
   .btn-green { background: var(--accent); color: white; }
   .btn-red { background: var(--danger); color: white; }
   .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+  .btn-edit { background: #F59E0B; color: white; }
   .btn:hover { opacity: 0.85; }
 
   /* Result box */
@@ -141,10 +142,33 @@
   .result-box.warn { background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; }
   .result-box.fail { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
 
-  /* Nota rows */
-  .nota-row { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; }
-  .nota-row input[type=number] { width: 90px; }
-  .btn-remove { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; font-weight: 700; padding: 0 0.25rem; }
+  /* ── SEMESTRES ── */
+  .semestre-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
+  .semestre-header { background: var(--primary-light); padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+  .semestre-header h3 { font-size: 0.95rem; font-weight: 700; color: var(--primary-dark); }
+  .semestre-body { padding: 1.25rem; display: none; }
+  .semestre-body.open { display: block; }
+
+  .asignatura-item { background: #FAFAFA; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 0.75rem; overflow: hidden; }
+  .asig-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; cursor: pointer; user-select: none; flex-wrap: wrap; gap: 0.5rem; background: #F3F4F6; }
+  .asig-title { font-weight: 700; font-size: 0.9rem; }
+  .asig-prom { font-size: 1.1rem; font-weight: 800; }
+  .prom-pass { color: var(--accent); }
+  .prom-warn { color: var(--warning); }
+  .prom-fail { color: var(--danger); }
+  .asig-body { padding: 1rem; display: none; }
+  .asig-body.open { display: block; }
+  .chevron { transition: transform 0.2s; display: inline-block; font-style: normal; }
+  .chevron.open { transform: rotate(90deg); }
+
+  /* Stat cards */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--primary-light); border-radius: var(--radius-sm); padding: 0.85rem 1rem; text-align: center; }
+  .stat-card .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--primary-dark); }
+  .stat-card .stat-lbl { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Scale table */
   .scale-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
@@ -156,29 +180,86 @@
   .badge-warn { background: #FEF3C7; color: #92400E; }
   .badge-fail { background: #FEE2E2; color: #991B1B; }
 
-  /* Semestres */
-  .semestre-item { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
-  .semestre-header { background: var(--primary-light); padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
-  .semestre-header h3 { font-size: 0.95rem; font-weight: 700; color: var(--primary-dark); }
-  .semestre-body { padding: 1.25rem; display: none; }
-  .semestre-body.open { display: block; }
+  /* Nota rows */
+  .nota-row { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; }
+  .nota-row input[type=number] { width: 90px; }
+  .btn-remove { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; font-weight: 700; padding: 0 0.25rem; }
 
-  .asignatura-item { background: #FAFAFA; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 0.75rem; }
-  .asig-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
-  .asig-title { font-weight: 700; font-size: 0.9rem; }
-  .asig-prom { font-size: 1.1rem; font-weight: 800; }
-  .prom-pass { color: var(--accent); }
-  .prom-warn { color: var(--warning); }
-  .prom-fail { color: var(--danger); }
+  /* ── MODAL EDICIÓN ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+  .modal-box { background: white; border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+  .modal-field { margin-bottom: 0.9rem; }
+  .modal-field label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--muted); margin-bottom: 0.3rem; text-transform: uppercase; }
+  .modal-field input { width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid #E5E7EB; border-radius: var(--radius-sm); font-size: 0.9rem; outline: none; }
+  .modal-field input:focus { border-color: var(--primary); }
+  .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; justify-content: flex-end; flex-wrap: wrap; }
+  .modal-delete-row { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-delete-row span { font-size: 0.8rem; color: var(--muted); }
 
-  /* Stat cards */
-  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
-  .stat-card { background: var(--primary-light); border-radius: var(--radius-sm); padding: 0.85rem 1rem; text-align: center; }
-  .stat-card .stat-val { font-size: 1.6rem; font-weight: 800; color: var(--primary-dark); }
-  .stat-card .stat-lbl { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+  /* ── ASISTENCIA ── */
+  .asistencia-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+  .asistencia-card { background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; position: relative; overflow: hidden; }
+  .asistencia-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+  .asistencia-card.seguro::before { background: var(--accent); }
+  .asistencia-card.precaucion::before { background: var(--warning); }
+  .asistencia-card.peligro::before { background: var(--danger); }
+  .asist-ramo { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
+  .asist-sem { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
+  .asist-pct-wrap { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .asist-pct-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; font-weight: 800; flex-shrink: 0; }
+  .asist-pct-circle.seguro { background: var(--accent-light); color: #065F46; border: 3px solid var(--accent); }
+  .asist-pct-circle.precaucion { background: #FEF3C7; color: #92400E; border: 3px solid var(--warning); }
+  .asist-pct-circle.peligro { background: #FEE2E2; color: #991B1B; border: 3px solid var(--danger); }
+  .asist-info { flex: 1; }
+  .asist-info p { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.25rem; }
+  .asist-info strong { color: var(--text); }
+  .asist-estado { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.78rem; font-weight: 700; margin-bottom: 1rem; }
+  .asist-estado.seguro { background: var(--accent-light); color: #065F46; }
+  .asist-estado.precaucion { background: #FEF3C7; color: #92400E; }
+  .asist-estado.peligro { background: #FEE2E2; color: #991B1B; }
+  .asist-bar-wrap { background: #E5E7EB; border-radius: 99px; height: 8px; margin-bottom: 1rem; overflow: hidden; }
+  .asist-bar { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .asist-bar.seguro { background: var(--accent); }
+  .asist-bar.precaucion { background: var(--warning); }
+  .asist-bar.peligro { background: var(--danger); }
+  .asist-sim-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+  .asist-config { border-top: 1px solid var(--border); margin-top: 1rem; padding-top: 1rem; display: none; }
+  .asist-config.open { display: block; }
+  .asist-config-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .asist-preview { background: #FEF3C7; border-radius: var(--radius-sm); padding: 0.65rem 1rem; font-size: 0.85rem; color: #92400E; font-weight: 600; margin-top: 0.5rem; display: none; }
+  .asist-preview.show { display: block; }
 
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* ── CALENDARIO ── */
+  .proximas-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .prox-item { display: flex; align-items: center; gap: 1rem; background: white; border-radius: var(--radius-sm); padding: 0.85rem 1.1rem; border: 1px solid var(--border); flex-wrap: wrap; }
+  .prox-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .prox-dot.hoy { background: var(--danger); animation: pulse 1s infinite; }
+  .prox-dot.urgente { background: var(--warning); }
+  .prox-dot.normal { background: var(--primary); }
+  .prox-dot.pasada { background: var(--muted); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .prox-ramo { font-weight: 700; font-size: 0.85rem; min-width: 120px; }
+  .prox-eval { font-size: 0.85rem; color: var(--muted); flex: 1; }
+  .prox-fecha { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .prox-dias { padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+  .prox-dias.hoy { background: #FEE2E2; color: #991B1B; }
+  .prox-dias.urgente { background: #FEF3C7; color: #92400E; }
+  .prox-dias.normal { background: var(--primary-light); color: var(--primary-dark); }
+  .prox-dias.pasada { background: #F3F4F6; color: var(--muted); }
+
+  /* Calendario mensual */
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .cal-nav h3 { font-size: 1rem; font-weight: 700; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-day-header { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); padding: 0.4rem 0; text-transform: uppercase; }
+  .cal-day { min-height: 56px; border-radius: 6px; padding: 0.3rem; font-size: 0.8rem; background: white; border: 1px solid transparent; position: relative; }
+  .cal-day.other-month { opacity: 0.35; }
+  .cal-day.today { border-color: var(--primary); background: var(--primary-light); }
+  .cal-day-num { font-weight: 600; font-size: 0.78rem; margin-bottom: 2px; }
+  .cal-event { background: var(--primary); color: white; border-radius: 3px; padding: 1px 4px; font-size: 0.65rem; font-weight: 600; margin-bottom: 1px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .cal-event.urgente { background: var(--warning); }
+  .cal-event.hoy-ev { background: var(--danger); }
 
   @media (max-width: 600px) {
     .app-main { padding: 1rem; }
@@ -204,8 +285,6 @@
       <button class="auth-tab active" onclick="showAuthTab('login')">Iniciar sesión</button>
       <button class="auth-tab" onclick="showAuthTab('register')">Registrarse</button>
     </div>
-
-    <!-- Login -->
     <div id="tab-login">
       <div class="form-group">
         <label>Correo</label>
@@ -222,8 +301,6 @@
       <button class="btn-primary" onclick="doLogin()" id="btn-login">Entrar</button>
       <div class="auth-msg" id="login-msg"></div>
     </div>
-
-    <!-- Register -->
     <div id="tab-register" style="display:none">
       <div class="form-group">
         <label>Nombre</label>
@@ -266,6 +343,8 @@
       <button class="nav-tab active" onclick="showSection('calc')">🧮 Calculadora</button>
       <button class="nav-tab" onclick="showSection('escala')">📊 Escala de notas</button>
       <button class="nav-tab" onclick="showSection('semestres')">📚 Mis semestres</button>
+      <button class="nav-tab" onclick="showSection('asistencia')">✅ Asistencia</button>
+      <button class="nav-tab" onclick="showSection('calendario')">📅 Calendario</button>
     </div>
   </div>
 
@@ -279,7 +358,6 @@
         <div class="stat-card"><div class="stat-val" id="stat-resto">-</div><div class="stat-lbl">Pond. restante</div></div>
         <div class="stat-card"><div class="stat-val" id="stat-needed">-</div><div class="stat-lbl">Nota mínima restante</div></div>
       </div>
-
       <div class="two-col" style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
         <div class="card">
           <div class="card-title"><span class="icon">🧮</span> Calculadora con ponderación</div>
@@ -291,18 +369,29 @@
           </div>
           <div id="calc-result"></div>
         </div>
-
         <div class="card">
           <div class="card-title"><span class="icon">🎯</span> ¿Voy a examen?</div>
           <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">En Chile, si tu promedio es ≥ 5.0 quedas eximido. Entre 4.0 y 4.9 vas a examen. Bajo 4.0 repruebas.</p>
-          <div class="input-row" style="flex-direction:column; align-items:flex-start;">
-            <div>
-              <label class="field-label">Promedio de presentación</label>
-              <input type="text" inputmode="decimal" id="examen-prom" placeholder="Ej: 4,5 o 4.5" style="width:180px">
+          <div style="display:flex; flex-direction:column; gap:0.85rem; align-items:flex-start;">
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+              <div>
+                <label class="field-label">Promedio de presentación</label>
+                <input type="text" inputmode="decimal" id="examen-prom" placeholder="Ej: 4,5" style="width:140px">
+              </div>
+              <div>
+                <label class="field-label">Ponderación (%)</label>
+                <input type="number" id="examen-pond-prom" placeholder="60" min="0" max="100" value="60" style="width:80px">
+              </div>
             </div>
-            <div>
-              <label class="field-label">Nota del examen (opcional)</label>
-              <input type="text" inputmode="decimal" id="examen-nota" placeholder="Ej: 5,0" style="width:180px">
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+              <div>
+                <label class="field-label">Nota del examen (opcional)</label>
+                <input type="text" inputmode="decimal" id="examen-nota" placeholder="Ej: 5,0" style="width:140px">
+              </div>
+              <div>
+                <label class="field-label">Ponderación (%)</label>
+                <input type="number" id="examen-pond-exam" placeholder="40" min="0" max="100" value="40" style="width:80px">
+              </div>
             </div>
             <button class="btn btn-purple" onclick="calcExamen()">Ver resultado</button>
           </div>
@@ -319,12 +408,7 @@
           <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1.25rem;">Referencia de calificación 1.0 – 7.0</p>
           <table class="scale-table">
             <thead>
-              <tr>
-                <th>Rango</th>
-                <th>Concepto</th>
-                <th>Estado</th>
-                <th>¿Examen?</th>
-              </tr>
+              <tr><th>Rango</th><th>Concepto</th><th>Estado</th><th>¿Examen?</th></tr>
             </thead>
             <tbody>
               <tr><td>6.0 – 7.0</td><td>Sobresaliente</td><td><span class="badge badge-pass">Aprobado</span></td><td>Eximido ✅</td></tr>
@@ -368,45 +452,112 @@
           <button class="btn btn-purple" onclick="agregarSemestre()">Agregar semestre</button>
         </div>
       </div>
-
       <div id="semestres-list"></div>
+    </div>
+
+    <!-- ── ASISTENCIA ── -->
+    <div class="section" id="sec-asistencia">
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="card-title"><span class="icon">✅</span> Asistencia por ramo</div>
+        <p style="font-size:0.85rem;color:var(--muted);">Configura el total de clases, el mínimo de asistencia y registra tus faltas en cada ramo. Verás en tiempo real cuántos "comodines" te quedan.</p>
+      </div>
+      <div class="asistencia-grid" id="asistencia-grid">
+        <div class="card" style="text-align:center;color:var(--muted);padding:2.5rem;">Cargando ramos... 📋</div>
+      </div>
+    </div>
+
+    <!-- ── CALENDARIO ── -->
+    <div class="section" id="sec-calendario">
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="card-title"><span class="icon">⚡</span> Próximas evaluaciones</div>
+        <div id="proximas-list"><div style="color:var(--muted);font-size:0.9rem;">Cargando...</div></div>
+      </div>
+      <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <div class="card">
+          <div class="cal-nav">
+            <button class="btn btn-outline" style="padding:0.4rem 0.75rem;" onclick="calPrev()">‹</button>
+            <h3 id="cal-title"></h3>
+            <button class="btn btn-outline" style="padding:0.4rem 0.75rem;" onclick="calNext()">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📝</span> Agregar fecha a evaluación</div>
+          <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">Selecciona un ramo y una nota/evaluación para asignarle una fecha.</p>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div>
+              <label class="field-label">Semestre</label>
+              <select id="cal-sem-sel" onchange="calCargarRamos()" style="width:100%">
+                <option value="">-- Selecciona semestre --</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Ramo</label>
+              <select id="cal-ramo-sel" onchange="calCargarNotas()" style="width:100%">
+                <option value="">-- Selecciona ramo --</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Evaluación</label>
+              <select id="cal-nota-sel" style="width:100%">
+                <option value="">-- Selecciona evaluación --</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Fecha</label>
+              <input type="date" id="cal-fecha" style="width:100%">
+            </div>
+            <button class="btn btn-purple" onclick="guardarFechaEval()">Guardar fecha</button>
+            <div id="cal-msg" style="font-size:0.85rem;display:none;padding:0.5rem;border-radius:6px;"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
 </div>
 
+<!-- ══════════════ MODAL EDICIÓN ══════════════ -->
+<div class="modal-overlay" id="modal-overlay" style="display:none" onclick="cerrarModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title">✏️ Editar</div>
+    <div id="modal-fields"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-purple" onclick="guardarModal()">Guardar cambios</button>
+    </div>
+    <div class="modal-delete-row">
+      <span>¿Eliminar este elemento?</span>
+      <button class="btn btn-red" onclick="eliminarDesdeModal()">🗑 Eliminar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════ CONFIGURACIÓN SUPABASE ══════════════
-// ⚠️ REEMPLAZA CON TUS DATOS DE SUPABASE
 const SUPABASE_URL = 'https://xsilzsuulbtxxetsrdxy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzaWx6c3V1bGJ0eHhldHNyZHh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjM0OTQsImV4cCI6MjA5NzEzOTQ5NH0.Ek_y-eBhAczR_yLM9RwlJbv4_DQkVd_OEbdO4dpO7Z8';
-// ════════════════════════════════════════════════════
-
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
 let semestresData = [];
+const openSemIds = new Set();
+const openAsigIds = new Set();
 
-// ── Helper: acepta coma o punto como decimal ──
 function parseNota(val) {
   if (val === undefined || val === null || val === '') return NaN;
   return parseFloat(String(val).replace(',', '.'));
 }
 
-
-// ── Sesión persistente (30 días via localStorage) ──
-function saveSession(session) {
-  const data = { session, savedAt: Date.now() };
-  localStorage.setItem('pasa_ramos_session', JSON.stringify(data));
-}
+// ── Sesión persistente ──
+function saveSession(session) { localStorage.setItem('pasa_ramos_session', JSON.stringify({ session, savedAt: Date.now() })); }
 function loadSession() {
   try {
     const raw = localStorage.getItem('pasa_ramos_session');
     if (!raw) return null;
     const { session, savedAt } = JSON.parse(raw);
-    const days30 = 30 * 24 * 60 * 60 * 1000;
-    if (Date.now() - savedAt > days30) { localStorage.removeItem('pasa_ramos_session'); return null; }
+    if (Date.now() - savedAt > 30*24*60*60*1000) { localStorage.removeItem('pasa_ramos_session'); return null; }
     return session;
   } catch { return null; }
 }
@@ -416,30 +567,19 @@ function clearSession() { localStorage.removeItem('pasa_ramos_session'); }
 function showAuthTab(tab) {
   document.getElementById('tab-login').style.display = tab === 'login' ? 'block' : 'none';
   document.getElementById('tab-register').style.display = tab === 'register' ? 'block' : 'none';
-  document.querySelectorAll('.auth-tab').forEach((t, i) => {
-    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
-  });
+  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
 }
-
-function showMsg(id, text, type) {
-  const el = document.getElementById(id);
-  el.textContent = text;
-  el.className = 'auth-msg ' + type;
-}
+function showMsg(id, text, type) { const el = document.getElementById(id); el.textContent = text; el.className = 'auth-msg ' + type; }
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   const remember = document.getElementById('remember-me').checked;
   if (!email || !pass) return showMsg('login-msg', 'Completa todos los campos.', 'error');
-
   const btn = document.getElementById('btn-login');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-
+  btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true;
   const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
   btn.textContent = 'Entrar'; btn.disabled = false;
-
   if (error) return showMsg('login-msg', 'Correo o contraseña incorrectos.', 'error');
   if (remember) saveSession(data.session);
   initApp(data.user);
@@ -451,17 +591,10 @@ async function doRegister() {
   const pass = document.getElementById('reg-pass').value;
   if (!name || !email || !pass) return showMsg('register-msg', 'Completa todos los campos.', 'error');
   if (pass.length < 6) return showMsg('register-msg', 'La contraseña debe tener al menos 6 caracteres.', 'error');
-
   const btn = document.getElementById('btn-register');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-
-  const { data, error } = await db.auth.signUp({
-    email, password: pass,
-    options: { data: { full_name: name } }
-  });
+  btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true;
+  const { data, error } = await db.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
   btn.textContent = 'Crear cuenta'; btn.disabled = false;
-
   if (error) return showMsg('register-msg', error.message, 'error');
   showMsg('register-msg', '¡Cuenta creada! Revisa tu correo para confirmar.', 'success');
 }
@@ -484,7 +617,6 @@ function initApp(user) {
   loadSemestres();
 }
 
-// ── Restaurar sesión al cargar ──
 window.addEventListener('DOMContentLoaded', async () => {
   const savedSession = loadSession();
   if (savedSession) {
@@ -501,150 +633,100 @@ function showSection(id) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
   event.currentTarget.classList.add('active');
+  if (id === 'asistencia') renderAsistencia();
+  if (id === 'calendario') { renderCalendario(); renderProximas(); calCargarSelectores(); }
 }
 
 // ══════════════ CALCULADORA ══════════════
 let calcNotas = [];
-
-function initCalcNotas() {
-  calcNotas = [];
-  document.getElementById('notas-calc-list').innerHTML = '';
-  addNotaCalc(); addNotaCalc(); addNotaCalc();
-}
-
+function initCalcNotas() { calcNotas = []; document.getElementById('notas-calc-list').innerHTML = ''; addNotaCalc(); addNotaCalc(); addNotaCalc(); }
 function addNotaCalc() {
-  const id = Date.now() + Math.random();
-  calcNotas.push(id);
-  const div = document.createElement('div');
-  div.className = 'nota-row';
-  div.id = 'nota-' + id;
-  div.innerHTML = `
-    <div><label class="field-label">Nota</label><input type="text" inputmode="decimal" placeholder="Ej: 5,6 o 5.6" class="nota-val" data-id="${id}"></div>
+  const id = Date.now() + Math.random(); calcNotas.push(id);
+  const div = document.createElement('div'); div.className = 'nota-row'; div.id = 'nota-' + id;
+  div.innerHTML = `<div><label class="field-label">Nota</label><input type="text" inputmode="decimal" placeholder="Ej: 5,6" class="nota-val" data-id="${id}"></div>
     <div><label class="field-label">Ponderación (%)</label><input type="number" placeholder="Ej: 30" min="0" max="100" class="nota-pond" data-id="${id}"></div>
-    <button class="btn-remove" onclick="removeNotaCalc('${id}')" title="Eliminar">✕</button>
-  `;
+    <button class="btn-remove" onclick="removeNotaCalc('${id}')" title="Eliminar">✕</button>`;
   document.getElementById('notas-calc-list').appendChild(div);
 }
-
-function removeNotaCalc(id) {
-  const idx = calcNotas.indexOf(id);
-  if (idx > -1) calcNotas.splice(idx, 1);
-  document.getElementById('nota-' + id)?.remove();
-}
-
-function clearCalc() {
-  initCalcNotas();
-  document.getElementById('calc-result').innerHTML = '';
-  document.getElementById('calc-stats').style.display = 'none';
-}
-
+function removeNotaCalc(id) { const idx = calcNotas.indexOf(id); if (idx > -1) calcNotas.splice(idx, 1); document.getElementById('nota-' + id)?.remove(); }
+function clearCalc() { initCalcNotas(); document.getElementById('calc-result').innerHTML = ''; document.getElementById('calc-stats').style.display = 'none'; }
 function calcularNotas() {
   let sumaP = 0, sumaNP = 0, hay = false;
   calcNotas.forEach(id => {
     const nota = parseNota(document.querySelector(`.nota-val[data-id="${id}"]`)?.value);
     const pond = parseFloat(document.querySelector(`.nota-pond[data-id="${id}"]`)?.value);
-    if (!isNaN(nota) && !isNaN(pond) && pond > 0) {
-      sumaNP += nota * pond;
-      sumaP += pond;
-      hay = true;
-    }
+    if (!isNaN(nota) && !isNaN(pond) && pond > 0) { sumaNP += nota * pond; sumaP += pond; hay = true; }
   });
   if (!hay) { document.getElementById('calc-result').innerHTML = '<div class="result-box warn">Ingresa al menos una nota con ponderación.</div>'; return; }
-  const prom = sumaNP / sumaP;
-  const resto = 100 - sumaP;
+  const prom = sumaNP / sumaP, resto = 100 - sumaP;
   let notaNec = resto > 0 ? ((4.0 * 100 - sumaNP) / resto) : null;
-
   document.getElementById('stat-prom').textContent = prom.toFixed(2);
   document.getElementById('stat-pond').textContent = sumaP.toFixed(0) + '%';
   document.getElementById('stat-resto').textContent = resto.toFixed(0) + '%';
   document.getElementById('stat-needed').textContent = notaNec !== null ? (notaNec <= 1 ? '¡Ya!' : notaNec > 7 ? 'Imp.' : notaNec.toFixed(1)) : '-';
   document.getElementById('calc-stats').style.display = 'grid';
-
   let cls = prom >= 5 ? 'pass' : prom >= 4 ? 'warn' : 'fail';
-  let msg = prom >= 5 ? `✅ Promedio ${prom.toFixed(2)} — ¡Eximido! 🎉` :
-            prom >= 4 ? `⚠️ Promedio ${prom.toFixed(2)} — Podrías ir a examen` :
-            `❌ Promedio ${prom.toFixed(2)} — En riesgo de reprobar`;
-  if (resto > 0 && notaNec !== null) {
-    msg += notaNec > 7 ? ` | Ya no es posible aprobar con el ${resto}% restante.` :
-           notaNec <= 1 ? ` | ¡Ya tienes asegurado el 4.0!` :
-           ` | Necesitas ${notaNec.toFixed(1)} en el ${resto}% restante para llegar a 4.0`;
-  }
+  let msg = prom >= 5 ? `✅ Promedio ${prom.toFixed(2)} — ¡Eximido! 🎉` : prom >= 4 ? `⚠️ Promedio ${prom.toFixed(2)} — Podrías ir a examen` : `❌ Promedio ${prom.toFixed(2)} — En riesgo de reprobar`;
+  if (resto > 0 && notaNec !== null) msg += notaNec > 7 ? ` | Ya no es posible aprobar con el ${resto}% restante.` : notaNec <= 1 ? ` | ¡Ya tienes asegurado el 4.0!` : ` | Necesitas ${notaNec.toFixed(1)} en el ${resto}% restante para llegar a 4.0`;
   document.getElementById('calc-result').innerHTML = `<div class="result-box ${cls}">${msg}</div>`;
 }
 
 function calcExamen() {
   const prom = parseNota(document.getElementById('examen-prom').value);
   const exam = parseNota(document.getElementById('examen-nota').value);
-  if (isNaN(prom) || prom < 1 || prom > 7) {
-    document.getElementById('examen-result').innerHTML = '<div class="result-box warn">Ingresa un promedio válido (1.0 – 7.0).</div>'; return;
-  }
+  const pondProm = parseFloat(document.getElementById('examen-pond-prom').value) || 60;
+  const pondExam = parseFloat(document.getElementById('examen-pond-exam').value) || 40;
+  if (isNaN(prom) || prom < 1 || prom > 7) { document.getElementById('examen-result').innerHTML = '<div class="result-box warn">Ingresa un promedio válido (1.0 – 7.0).</div>'; return; }
   let html;
   if (prom >= 5.0) {
-    html = '<div class="result-box pass">✅ Con promedio ' + prom.toFixed(1) + ' estás <strong>eximido/a</strong>. No necesitas rendir examen 🎉</div>';
+    html = `<div class="result-box pass">✅ Con promedio ${prom.toFixed(1)} estás <strong>eximido/a</strong>. No necesitas rendir examen 🎉</div>`;
   } else if (prom >= 4.0) {
-    const notaFinal = !isNaN(exam) ? ((prom * 0.6 + exam * 0.4)).toFixed(2) : null;
-    const notaNecExam = ((4.0 - prom * 0.6) / 0.4).toFixed(1);
+    const pP = pondProm / 100, pE = pondExam / 100;
+    const notaFinal = !isNaN(exam) ? (prom * pP + exam * pE).toFixed(2) : null;
+    const notaNecExam = ((4.0 - prom * pP) / pE).toFixed(1);
     html = `<div class="result-box warn">⚠️ Con promedio ${prom.toFixed(1)} <strong>vas a examen</strong>.<br>
-    Necesitas mínimo <strong>${notaNecExam}</strong> en el examen para aprobar (ponderación 40% examen).
+    Ponderación: Presentación ${pondProm}% / Examen ${pondExam}%.<br>
+    Necesitas mínimo <strong>${notaNecExam}</strong> en el examen para aprobar.
     ${notaFinal ? `<br>Con nota de examen ${exam.toFixed(1)} → Nota final: <strong>${notaFinal}</strong> ${parseFloat(notaFinal) >= 4.0 ? '✅' : '❌'}` : ''}
     </div>`;
   } else {
-    html = '<div class="result-box fail">❌ Con promedio ' + prom.toFixed(1) + ' el ramo está <strong>reprobado</strong>. No hay examen de recuperación.</div>';
+    html = `<div class="result-box fail">❌ Con promedio ${prom.toFixed(1)} el ramo está <strong>reprobado</strong>. No hay examen de recuperación.</div>`;
   }
   document.getElementById('examen-result').innerHTML = html;
 }
 
-// ── Convertidor % → nota ──
 function convertirPct() {
   const pct = parseFloat(document.getElementById('pct-input').value);
   const min = parseFloat(document.getElementById('pct-min').value) || 60;
-  if (isNaN(pct) || pct < 0 || pct > 100) {
-    document.getElementById('pct-result').innerHTML = '<div class="result-box warn">Ingresa un porcentaje válido (0–100).</div>'; return;
-  }
-  let nota;
-  if (pct < min) { nota = 1.0 + (pct / min) * 3.0; }
-  else { nota = 4.0 + ((pct - min) / (100 - min)) * 3.0; }
+  if (isNaN(pct) || pct < 0 || pct > 100) { document.getElementById('pct-result').innerHTML = '<div class="result-box warn">Ingresa un porcentaje válido (0–100).</div>'; return; }
+  let nota = pct < min ? 1.0 + (pct / min) * 3.0 : 4.0 + ((pct - min) / (100 - min)) * 3.0;
   nota = Math.min(7.0, Math.max(1.0, nota));
   let cls = nota >= 5 ? 'pass' : nota >= 4 ? 'warn' : 'fail';
-  document.getElementById('pct-result').innerHTML = `<div class="result-box ${cls}">
-    Con ${pct}% obtienes la nota <strong>${nota.toFixed(1)}</strong>
-    ${nota >= 4 ? '✅ Aprobado' : '❌ Reprobado'}
-  </div>`;
+  document.getElementById('pct-result').innerHTML = `<div class="result-box ${cls}">Con ${pct}% obtienes la nota <strong>${nota.toFixed(1)}</strong> ${nota >= 4 ? '✅ Aprobado' : '❌ Reprobado'}</div>`;
 }
 
-// ══════════════ SEMESTRES (Supabase) ══════════════
+// ══════════════ SEMESTRES ══════════════
 async function loadSemestres() {
-  const { data, error } = await db
-    .from('semestres')
-    .select('*, asignaturas(*, notas(*))')
-    .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: true });
+  const { data, error } = await db.from('semestres').select('*, asignaturas(*, notas(*))').eq('user_id', currentUser.id).order('created_at', { ascending: true });
   if (error) { console.error(error); return; }
   semestresData = data || [];
   renderSemestres();
 }
 
-const openSemIds = new Set();
-
 function renderSemestres() {
   const container = document.getElementById('semestres-list');
-  if (semestresData.length === 0) {
-    container.innerHTML = '<div class="card" style="text-align:center; color:var(--muted); padding:2.5rem;">Aún no tienes semestres. ¡Agrega uno arriba! 📚</div>';
-    return;
-  }
-  // Guardar cuáles están abiertos antes de re-renderizar
+  if (semestresData.length === 0) { container.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:2.5rem;">Aún no tienes semestres. ¡Agrega uno arriba! 📚</div>'; return; }
   semestresData.forEach(s => { if (document.getElementById('body-' + s.id)?.classList.contains('open')) openSemIds.add(String(s.id)); });
-  const openIds = openSemIds;
   container.innerHTML = semestresData.map(sem => `
     <div class="semestre-item" id="sem-${sem.id}">
       <div class="semestre-header" onclick="toggleSem('${sem.id}')">
         <h3>📅 ${sem.nombre}</h3>
         <div style="display:flex;align-items:center;gap:0.75rem;">
           <span style="font-size:0.8rem;color:var(--muted)">${(sem.asignaturas||[]).length} ramos</span>
-          <button class="btn btn-red" style="padding:0.35rem 0.75rem;font-size:0.75rem;" onclick="event.stopPropagation();eliminarSemestre('${sem.id}')">Eliminar</button>
+          <button class="btn btn-edit" style="padding:0.3rem 0.7rem;font-size:0.75rem;" onclick="event.stopPropagation();abrirModalSemestre('${sem.id}')">✏️ Editar</button>
         </div>
       </div>
-      <div class="semestre-body${openIds.has(sem.id) ? ' open' : ''}" id="body-${sem.id}">
+      <div class="semestre-body${openSemIds.has(String(sem.id)) ? ' open' : ''}" id="body-${sem.id}">
         <div id="asigs-${sem.id}">
           ${(sem.asignaturas||[]).map(asig => renderAsignatura(asig)).join('')}
         </div>
@@ -665,35 +747,31 @@ function renderAsignatura(asig) {
   const prom = calcPromAsig(notas);
   const promStr = prom !== null ? prom.toFixed(2) : '-';
   const promClass = prom === null ? '' : prom >= 5 ? 'prom-pass' : prom >= 4 ? 'prom-warn' : 'prom-fail';
+  const isOpen = openAsigIds.has(String(asig.id));
   return `
     <div class="asignatura-item" id="asig-${asig.id}">
-      <div class="asig-header">
-        <span class="asig-title">📖 ${asig.nombre}</span>
+      <div class="asig-header" onclick="toggleAsig('${asig.id}')">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <i class="chevron${isOpen?' open':''}">▶</i>
+          <span class="asig-title">📖 ${asig.nombre}</span>
+        </div>
         <div style="display:flex;align-items:center;gap:0.75rem;">
           <span class="asig-prom ${promClass}">Prom: ${promStr}</span>
-          <button class="btn btn-red" style="padding:0.3rem 0.6rem;font-size:0.75rem;" onclick="eliminarAsignatura('${asig.id}','${asig.semestre_id}')">✕</button>
+          <button class="btn btn-edit" style="padding:0.25rem 0.6rem;font-size:0.73rem;" onclick="event.stopPropagation();abrirModalAsignatura('${asig.id}','${asig.semestre_id}')">✏️</button>
         </div>
       </div>
-      <div id="notas-${asig.id}">
-        ${notas.map(n => renderNota(n, asig.id)).join('')}
+      <div class="asig-body${isOpen?' open':''}" id="asig-body-${asig.id}">
+        <div id="notas-${asig.id}">
+          ${notas.map(n => renderNota(n, asig.id)).join('')}
+        </div>
+        <div class="input-row" style="margin-top:0.6rem;">
+          <div><label class="field-label">Nota</label><input type="text" inputmode="decimal" id="nn-${asig.id}" placeholder="Ej: 5,6" style="width:90px"></div>
+          <div><label class="field-label">Pond. (%)</label><input type="number" id="np-${asig.id}" placeholder="%" min="0" max="100" style="width:80px"></div>
+          <div><label class="field-label">Descripción</label><input type="text" id="nd-${asig.id}" placeholder="Ej: Certamen 1" style="min-width:120px"></div>
+          <button class="btn btn-purple" style="margin-top:1.2rem;" onclick="agregarNota('${asig.id}','${asig.semestre_id}')">+ Nota</button>
+        </div>
       </div>
-      <div class="input-row" style="margin-top:0.6rem;">
-        <div>
-          <label class="field-label">Nota</label>
-          <input type="text" inputmode="decimal" id="nn-${asig.id}" placeholder="Ej: 5,6" style="width:90px">
-        </div>
-        <div>
-          <label class="field-label">Pond. (%)</label>
-          <input type="number" id="np-${asig.id}" placeholder="%" min="0" max="100" style="width:80px">
-        </div>
-        <div>
-          <label class="field-label">Descripción</label>
-          <input type="text" id="nd-${asig.id}" placeholder="Ej: Certamen 1" style="min-width:120px">
-        </div>
-        <button class="btn btn-purple" style="margin-top:1.2rem;" onclick="agregarNota('${asig.id}','${asig.semestre_id}')">+ Nota</button>
-      </div>
-    </div>
-  `;
+    </div>`;
 }
 
 function renderNota(n, asigId) {
@@ -701,7 +779,7 @@ function renderNota(n, asigId) {
     <span style="font-weight:700;min-width:40px">${n.nota}</span>
     <span style="color:var(--muted)">${n.ponderacion}%</span>
     <span style="flex:1;color:var(--muted)">${n.descripcion || ''}</span>
-    <button class="btn-remove" title="Eliminar nota" onclick="eliminarNota('${n.id}','${asigId}','${n.semestre_id || ''}')">✕</button>
+    <button class="btn btn-edit" style="padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="abrirModalNota('${n.id}','${asigId}','${n.semestre_id||''}')">✏️</button>
   </div>`;
 }
 
@@ -715,6 +793,15 @@ function calcPromAsig(notas) {
 function toggleSem(id) {
   const body = document.getElementById('body-' + id);
   body.classList.toggle('open');
+  if (body.classList.contains('open')) openSemIds.add(String(id)); else openSemIds.delete(String(id));
+}
+
+function toggleAsig(id) {
+  const body = document.getElementById('asig-body-' + id);
+  const chev = document.querySelector(`#asig-${id} .chevron`);
+  body.classList.toggle('open');
+  chev?.classList.toggle('open');
+  if (body.classList.contains('open')) openAsigIds.add(String(id)); else openAsigIds.delete(String(id));
 }
 
 async function agregarSemestre() {
@@ -723,18 +810,7 @@ async function agregarSemestre() {
   const { data, error } = await db.from('semestres').insert({ user_id: currentUser.id, nombre }).select().single();
   if (error) { alert('Error al crear semestre: ' + error.message); return; }
   document.getElementById('new-sem-name').value = '';
-  data.asignaturas = [];
-  semestresData.push(data);
-  openSemIds.add(String(data.id));
-  renderSemestres();
-}
-
-async function eliminarSemestre(id) {
-  if (!confirm('¿Eliminar este semestre y todos sus ramos?')) return;
-  await db.from('semestres').delete().eq('id', id);
-  semestresData = semestresData.filter(s => s.id != id);
-  openSemIds.delete(String(id));
-  renderSemestres();
+  data.asignaturas = []; semestresData.push(data); openSemIds.add(String(data.id)); renderSemestres();
 }
 
 async function agregarAsignatura(semId) {
@@ -744,17 +820,7 @@ async function agregarAsignatura(semId) {
   if (error) { alert('Error: ' + error.message); return; }
   const sem = semestresData.find(s => s.id == semId);
   if (sem) { data.notas = []; sem.asignaturas = [...(sem.asignaturas || []), data]; }
-  openSemIds.add(String(semId));
-  renderSemestres();
-}
-
-async function eliminarAsignatura(asigId, semId) {
-  if (!confirm('¿Eliminar esta asignatura y sus notas?')) return;
-  await db.from('asignaturas').delete().eq('id', asigId);
-  const sem = semestresData.find(s => s.id == semId);
-  if (sem) sem.asignaturas = sem.asignaturas.filter(a => a.id != asigId);
-  openSemIds.add(String(semId));
-  renderSemestres();
+  openSemIds.add(String(semId)); renderSemestres();
 }
 
 async function agregarNota(asigId, semId) {
@@ -768,19 +834,329 @@ async function agregarNota(asigId, semId) {
   const sem = semestresData.find(s => s.id == semId);
   const asig = sem?.asignaturas?.find(a => a.id == asigId);
   if (asig) { asig.notas = [...(asig.notas || []), data]; }
-  openSemIds.add(String(semId));
+  openSemIds.add(String(semId)); openAsigIds.add(String(asigId)); renderSemestres();
+}
+
+// ══════════════ MODAL EDICIÓN ══════════════
+let modalCtx = {};
+
+function abrirModal(title, fields, ctx) {
+  modalCtx = ctx;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-fields').innerHTML = fields.map(f => `
+    <div class="modal-field">
+      <label>${f.label}</label>
+      <input type="${f.type||'text'}" id="mf-${f.key}" value="${f.value ?? ''}" placeholder="${f.placeholder||''}" ${f.min!==undefined?`min="${f.min}"`:''}  ${f.max!==undefined?`max="${f.max}"`:''}  step="${f.step||'any'}">
+    </div>`).join('');
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function cerrarModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').style.display = 'none';
+}
+
+async function guardarModal() {
+  const vals = {};
+  document.querySelectorAll('#modal-fields input').forEach(inp => vals[inp.id.replace('mf-','')] = inp.value.trim());
+  if (modalCtx.type === 'semestre') {
+    if (!vals.nombre) return alert('El nombre no puede estar vacío');
+    const { error } = await db.from('semestres').update({ nombre: vals.nombre }).eq('id', modalCtx.id);
+    if (error) return alert('Error: ' + error.message);
+    const sem = semestresData.find(s => s.id == modalCtx.id);
+    if (sem) sem.nombre = vals.nombre;
+  } else if (modalCtx.type === 'asignatura') {
+    if (!vals.nombre) return alert('El nombre no puede estar vacío');
+    const { error } = await db.from('asignaturas').update({ nombre: vals.nombre }).eq('id', modalCtx.id);
+    if (error) return alert('Error: ' + error.message);
+    const sem = semestresData.find(s => s.id == modalCtx.semId);
+    const asig = sem?.asignaturas?.find(a => a.id == modalCtx.id);
+    if (asig) asig.nombre = vals.nombre;
+  } else if (modalCtx.type === 'nota') {
+    const nota = parseNota(vals.nota);
+    const pond = parseFloat(vals.ponderacion);
+    if (isNaN(nota) || nota < 1 || nota > 7) return alert('Nota debe estar entre 1.0 y 7.0');
+    if (isNaN(pond) || pond <= 0) return alert('Ponderación inválida');
+    const { error } = await db.from('notas').update({ nota, ponderacion: pond, descripcion: vals.descripcion || '' }).eq('id', modalCtx.id);
+    if (error) return alert('Error: ' + error.message);
+    const sem = semestresData.find(s => s.id == modalCtx.semId);
+    const asig = sem?.asignaturas?.find(a => a.id == modalCtx.asigId);
+    const n = asig?.notas?.find(n => n.id == modalCtx.id);
+    if (n) { n.nota = nota; n.ponderacion = pond; n.descripcion = vals.descripcion || ''; }
+  }
+  document.getElementById('modal-overlay').style.display = 'none';
+  openSemIds.add(String(modalCtx.semId || modalCtx.id));
+  if (modalCtx.asigId) openAsigIds.add(String(modalCtx.asigId));
   renderSemestres();
 }
 
-async function eliminarNota(notaId, asigId, semId) {
-  if (!confirm('¿Eliminar esta nota?')) return;
-  await db.from('notas').delete().eq('id', notaId);
-  const sem = semestresData.find(s => s.id == semId);
-  const asig = sem?.asignaturas?.find(a => a.id == asigId);
-  if (asig) asig.notas = asig.notas.filter(n => n.id != notaId);
-  openSemIds.add(String(semId));
+async function eliminarDesdeModal() {
+  if (modalCtx.type === 'semestre') {
+    if (!confirm('¿Eliminar este semestre y todos sus ramos?')) return;
+    await db.from('semestres').delete().eq('id', modalCtx.id);
+    semestresData = semestresData.filter(s => s.id != modalCtx.id);
+    openSemIds.delete(String(modalCtx.id));
+  } else if (modalCtx.type === 'asignatura') {
+    if (!confirm('¿Eliminar esta asignatura y sus notas?')) return;
+    await db.from('asignaturas').delete().eq('id', modalCtx.id);
+    const sem = semestresData.find(s => s.id == modalCtx.semId);
+    if (sem) sem.asignaturas = sem.asignaturas.filter(a => a.id != modalCtx.id);
+    openSemIds.add(String(modalCtx.semId));
+  } else if (modalCtx.type === 'nota') {
+    if (!confirm('¿Eliminar esta nota?')) return;
+    await db.from('notas').delete().eq('id', modalCtx.id);
+    const sem = semestresData.find(s => s.id == modalCtx.semId);
+    const asig = sem?.asignaturas?.find(a => a.id == modalCtx.asigId);
+    if (asig) asig.notas = asig.notas.filter(n => n.id != modalCtx.id);
+    openSemIds.add(String(modalCtx.semId));
+    openAsigIds.add(String(modalCtx.asigId));
+  }
+  document.getElementById('modal-overlay').style.display = 'none';
   renderSemestres();
 }
+
+function abrirModalSemestre(semId) {
+  const sem = semestresData.find(s => s.id == semId);
+  if (!sem) return;
+  abrirModal('✏️ Editar semestre', [{ key: 'nombre', label: 'Nombre del semestre', value: sem.nombre, placeholder: 'Ej: 2025-1' }], { type: 'semestre', id: semId });
+}
+
+function abrirModalAsignatura(asigId, semId) {
+  const sem = semestresData.find(s => s.id == semId);
+  const asig = sem?.asignaturas?.find(a => a.id == asigId);
+  if (!asig) return;
+  abrirModal('✏️ Editar ramo', [{ key: 'nombre', label: 'Nombre del ramo', value: asig.nombre, placeholder: 'Ej: Cálculo I' }], { type: 'asignatura', id: asigId, semId });
+}
+
+function abrirModalNota(notaId, asigId, semId) {
+  let n = null;
+  for (const s of semestresData) { for (const a of (s.asignaturas||[])) { const found = (a.notas||[]).find(x => x.id == notaId); if (found) { n = found; break; } } if (n) break; }
+  if (!n) return;
+  abrirModal('✏️ Editar nota', [
+    { key: 'nota', label: 'Nota (1.0 – 7.0)', value: n.nota, type: 'text', placeholder: 'Ej: 5,6' },
+    { key: 'ponderacion', label: 'Ponderación (%)', value: n.ponderacion, type: 'number', min: 0, max: 100 },
+    { key: 'descripcion', label: 'Descripción', value: n.descripcion || '', placeholder: 'Ej: Certamen 1' }
+  ], { type: 'nota', id: notaId, asigId, semId });
+}
+
+// ══════════════ ASISTENCIA ══════════════
+// Estado local de asistencia (faltas por asig)
+let asistenciaLocal = {}; // { asigId: { total, minimo, faltas } }
+
+function getAsistenciaData(asigId) {
+  const key = 'asist_' + currentUser.id + '_' + asigId;
+  try { return JSON.parse(localStorage.getItem(key)) || { total: 32, minimo: 75, faltas: 0 }; } catch { return { total: 32, minimo: 75, faltas: 0 }; }
+}
+function saveAsistenciaData(asigId, data) {
+  const key = 'asist_' + currentUser.id + '_' + asigId;
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+function calcAsistencia(total, minimo, faltas) {
+  const maxFaltas = Math.floor(total * (1 - minimo / 100));
+  const restantes = maxFaltas - faltas;
+  const pct = total > 0 ? ((total - faltas) / total) * 100 : 0;
+  let estado = restantes > 2 ? 'seguro' : restantes >= 1 ? 'precaucion' : 'peligro';
+  if (pct < minimo) estado = 'peligro';
+  return { maxFaltas, restantes, pct, estado };
+}
+
+function renderAsistencia() {
+  const grid = document.getElementById('asistencia-grid');
+  const allAsigs = [];
+  semestresData.forEach(sem => (sem.asignaturas||[]).forEach(a => allAsigs.push({ ...a, semNombre: sem.nombre })));
+  if (allAsigs.length === 0) { grid.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:2.5rem;">No tienes ramos aún. Agrega semestres y ramos primero 📚</div>'; return; }
+  grid.innerHTML = allAsigs.map(asig => {
+    const d = getAsistenciaData(asig.id);
+    const c = calcAsistencia(d.total, d.minimo, d.faltas);
+    const estadoIcon = c.estado === 'seguro' ? '✅' : c.estado === 'precaucion' ? '⚠️' : '🚨';
+    const estadoText = c.estado === 'seguro' ? 'Seguro' : c.estado === 'precaucion' ? 'Precaución' : 'Peligro';
+    const barW = Math.min(100, c.pct);
+    return `<div class="asistencia-card ${c.estado}" id="ac-${asig.id}">
+      <div class="asist-ramo">📖 ${asig.nombre}</div>
+      <div class="asist-sem">${asig.semNombre}</div>
+      <div class="asist-pct-wrap">
+        <div class="asist-pct-circle ${c.estado}">${c.pct.toFixed(0)}%</div>
+        <div class="asist-info">
+          <p>Faltas actuales: <strong>${d.faltas}</strong></p>
+          <p>Máx. permitidas: <strong>${c.maxFaltas}</strong></p>
+          <p>Comodines restantes: <strong>${c.restantes}</strong></p>
+          <p>Mínimo requerido: <strong>${d.minimo}%</strong></p>
+        </div>
+      </div>
+      <div class="asist-estado ${c.estado}">${estadoIcon} ${estadoText}</div>
+      <div class="asist-bar-wrap"><div class="asist-bar ${c.estado}" style="width:${barW}%"></div></div>
+      <div id="asist-preview-${asig.id}" class="asist-preview"></div>
+      <div class="asist-sim-row">
+        <button class="btn btn-outline" style="font-size:0.8rem;" onclick="simularFalta('${asig.id}')">👁 Simular falta</button>
+        <button class="btn btn-red" style="font-size:0.8rem;" onclick="confirmarFalta('${asig.id}')">+1 Falta</button>
+        <button class="btn btn-green" style="font-size:0.8rem;" onclick="quitarFalta('${asig.id}')" ${d.faltas===0?'disabled':''}>-1 Falta</button>
+        <button class="btn btn-outline" style="font-size:0.8rem;" onclick="toggleConfig('${asig.id}')">⚙️</button>
+      </div>
+      <div class="asist-config" id="cfg-${asig.id}">
+        <div class="asist-config-grid">
+          <div><label class="field-label">Total clases</label><input type="number" id="cfg-total-${asig.id}" value="${d.total}" min="1" style="width:100%"></div>
+          <div><label class="field-label">% mínimo</label><input type="number" id="cfg-min-${asig.id}" value="${d.minimo}" min="1" max="100" style="width:100%"></div>
+          <div><label class="field-label">Faltas</label><input type="number" id="cfg-faltas-${asig.id}" value="${d.faltas}" min="0" style="width:100%"></div>
+        </div>
+        <button class="btn btn-purple" style="font-size:0.8rem;width:100%;" onclick="guardarConfig('${asig.id}')">Guardar configuración</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function simularFalta(asigId) {
+  const d = getAsistenciaData(asigId);
+  const c = calcAsistencia(d.total, d.minimo, d.faltas + 1);
+  const prev = document.getElementById('asist-preview-' + asigId);
+  const estadoIcon = c.estado === 'seguro' ? '✅' : c.estado === 'precaucion' ? '⚠️' : '🚨';
+  prev.textContent = `👁 Si faltas: ${c.pct.toFixed(0)}% asistencia, ${c.restantes} comodines restantes ${estadoIcon}`;
+  prev.className = 'asist-preview show';
+  prev.style.background = c.estado === 'seguro' ? '#D1FAE5' : c.estado === 'precaucion' ? '#FEF3C7' : '#FEE2E2';
+  prev.style.color = c.estado === 'seguro' ? '#065F46' : c.estado === 'precaucion' ? '#92400E' : '#991B1B';
+}
+
+function confirmarFalta(asigId) {
+  const d = getAsistenciaData(asigId);
+  d.faltas++;
+  saveAsistenciaData(asigId, d);
+  renderAsistencia();
+}
+
+function quitarFalta(asigId) {
+  const d = getAsistenciaData(asigId);
+  if (d.faltas > 0) d.faltas--;
+  saveAsistenciaData(asigId, d);
+  renderAsistencia();
+}
+
+function toggleConfig(asigId) {
+  document.getElementById('cfg-' + asigId).classList.toggle('open');
+}
+
+function guardarConfig(asigId) {
+  const total = parseInt(document.getElementById('cfg-total-' + asigId).value) || 32;
+  const minimo = parseInt(document.getElementById('cfg-min-' + asigId).value) || 75;
+  const faltas = parseInt(document.getElementById('cfg-faltas-' + asigId).value) || 0;
+  saveAsistenciaData(asigId, { total, minimo, faltas });
+  renderAsistencia();
+}
+
+// ══════════════ CALENDARIO ══════════════
+let calYear, calMonth;
+
+function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendario(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendario(); }
+
+function getAllEvals() {
+  const evals = [];
+  semestresData.forEach(sem => (sem.asignaturas||[]).forEach(asig => (asig.notas||[]).forEach(n => {
+    if (n.fecha_evaluacion) evals.push({ ...n, ramoNombre: asig.nombre, semNombre: sem.nombre });
+  })));
+  return evals.sort((a,b) => new Date(a.fecha_evaluacion) - new Date(b.fecha_evaluacion));
+}
+
+function diasRestantes(fechaStr) {
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const fecha = new Date(fechaStr + 'T00:00:00');
+  return Math.round((fecha - hoy) / (1000*60*60*24));
+}
+
+function renderProximas() {
+  const evals = getAllEvals();
+  const container = document.getElementById('proximas-list');
+  if (evals.length === 0) { container.innerHTML = '<div style="color:var(--muted);font-size:0.9rem;padding:1rem 0;">No hay evaluaciones con fecha asignada aún. Usa la sección de abajo para agregar fechas. 📅</div>'; return; }
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  container.innerHTML = '<div class="proximas-list">' + evals.map(ev => {
+    const dr = diasRestantes(ev.fecha_evaluacion);
+    const fecha = new Date(ev.fecha_evaluacion + 'T00:00:00');
+    const fechaStr = `${dias[fecha.getDay()]} ${fecha.getDate()} de ${meses[fecha.getMonth()]}`;
+    let tipo, dotCls, diasLabel;
+    if (dr === 0) { tipo = 'hoy'; diasLabel = '¡Es hoy!'; }
+    else if (dr < 0) { tipo = 'pasada'; diasLabel = `Hace ${Math.abs(dr)} día${Math.abs(dr)!==1?'s':''}`; }
+    else if (dr <= 3) { tipo = 'urgente'; diasLabel = `Faltan ${dr} día${dr!==1?'s':''}`; }
+    else { tipo = 'normal'; diasLabel = `Faltan ${dr} días`; }
+    dotCls = tipo;
+    return `<div class="prox-item">
+      <div class="prox-dot ${dotCls}"></div>
+      <div class="prox-ramo">${ev.ramoNombre}</div>
+      <div class="prox-eval">${ev.descripcion || 'Evaluación'} <span style="color:var(--primary);font-weight:700">${ev.ponderacion}%</span></div>
+      <div class="prox-fecha">${fechaStr}</div>
+      <div class="prox-dias ${tipo}">${diasLabel}</div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function renderCalendario() {
+  if (calYear === undefined) initCal();
+  const mesesNombres = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-title').textContent = `${mesesNombres[calMonth]} ${calYear}`;
+  const evals = getAllEvals();
+  const evMap = {};
+  evals.forEach(ev => { const k = ev.fecha_evaluacion; if (!evMap[k]) evMap[k] = []; evMap[k].push(ev); });
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay = new Date(calYear, calMonth + 1, 0);
+  const startDow = firstDay.getDay();
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  let html = dias.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+  for (let i = 0; i < startDow; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const fecha = new Date(calYear, calMonth, d);
+    const isHoy = fecha.getTime() === hoy.getTime();
+    const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs = evMap[key] || [];
+    const dr = diasRestantes(key);
+    html += `<div class="cal-day${isHoy?' today':''}">
+      <div class="cal-day-num">${d}</div>
+      ${evs.map(ev => `<div class="cal-event${dr===0?' hoy-ev':dr<=3?' urgente':''}" title="${ev.ramoNombre}: ${ev.descripcion||'Evaluación'}">${ev.ramoNombre.substring(0,8)}</div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+function calCargarSelectores() {
+  const semSel = document.getElementById('cal-sem-sel');
+  semSel.innerHTML = '<option value="">-- Selecciona semestre --</option>' + semestresData.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+  document.getElementById('cal-ramo-sel').innerHTML = '<option value="">-- Selecciona ramo --</option>';
+  document.getElementById('cal-nota-sel').innerHTML = '<option value="">-- Selecciona evaluación --</option>';
+}
+
+function calCargarRamos() {
+  const semId = document.getElementById('cal-sem-sel').value;
+  const sem = semestresData.find(s => s.id == semId);
+  const ramoSel = document.getElementById('cal-ramo-sel');
+  ramoSel.innerHTML = '<option value="">-- Selecciona ramo --</option>';
+  document.getElementById('cal-nota-sel').innerHTML = '<option value="">-- Selecciona evaluación --</option>';
+  if (sem) ramoSel.innerHTML += (sem.asignaturas||[]).map(a => `<option value="${a.id}">${a.nombre}</option>`).join('');
+}
+
+function calCargarNotas() {
+  const semId = document.getElementById('cal-sem-sel').value;
+  const asigId = document.getElementById('cal-ramo-sel').value;
+  const sem = semestresData.find(s => s.id == semId);
+  const asig = sem?.asignaturas?.find(a => a.id == asigId);
+  const notaSel = document.getElementById('cal-nota-sel');
+  notaSel.innerHTML = '<option value="">-- Selecciona evaluación --</option>';
+  if (asig) notaSel.innerHTML += (asig.notas||[]).map(n => `<option value="${n.id}">${n.descripcion||'Nota '+n.nota} (${n.ponderacion}%)</option>`).join('');
+}
+
+async function guardarFechaEval() {
+  const notaId = document.getElementById('cal-nota-sel').value;
+  const fecha = document.getElementById('cal-fecha').value;
+  const msg = document.getElementById('cal-msg');
+  if (!notaId || !fecha) { msg.textContent = 'Selecciona una evaluación y una fecha.'; msg.style.display='block'; msg.style.background='#FEE2E2'; msg.style.color='#991B1B'; return; }
+  const { error } = await db.from('notas').update({ fecha_evaluacion: fecha }).eq('id', notaId);
+  if (error) { msg.textContent = 'Error: ' + error.message; msg.style.display='block'; msg.style.background='#FEE2E2'; msg.style.color='#991B1B'; return; }
+  // Update local
+  for (const s of semestresData) for (const a of (s.asignaturas||[])) { const n = (a.notas||[]).find(x => x.id == notaId); if (n) { n.fecha_evaluacion = fecha; break; } }
+  msg.textContent = '✅ Fecha guardada correctamente.'; msg.style.display='block'; msg.style.background='#D1FAE5'; msg.style.color='#065F46';
+  renderCalendario(); renderProximas();
+  setTimeout(() => { msg.style.display='none'; }, 3000);
+}
+
+initCal();
 </script>
 </body>
 </html>
