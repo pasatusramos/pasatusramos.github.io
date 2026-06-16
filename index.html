@@ -521,7 +521,6 @@ function addNotaCalc() {
   div.innerHTML = `
     <div><label class="field-label">Nota</label><input type="text" inputmode="decimal" placeholder="Ej: 5,6 o 5.6" class="nota-val" data-id="${id}"></div>
     <div><label class="field-label">Ponderación (%)</label><input type="number" placeholder="Ej: 30" min="0" max="100" class="nota-pond" data-id="${id}"></div>
-    <div><label class="field-label">Descripción</label><input type="text" placeholder="Ej: Solemne 1" class="nota-desc" data-id="${id}" style="min-width:140px"></div>
     <button class="btn-remove" onclick="removeNotaCalc('${id}')" title="Eliminar">✕</button>
   `;
   document.getElementById('notas-calc-list').appendChild(div);
