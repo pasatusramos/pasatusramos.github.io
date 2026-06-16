@@ -185,6 +185,9 @@
     .banner-content { padding: 1rem; }
     .banner-title h2 { font-size: 1.1rem; }
   }
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr !important; }
+  }
 </style>
 </head>
 <body>
@@ -277,7 +280,7 @@
         <div class="stat-card"><div class="stat-val" id="stat-needed">-</div><div class="stat-lbl">Nota mínima restante</div></div>
       </div>
 
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1.25rem;">
+      <div class="two-col" style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
         <div class="card">
           <div class="card-title"><span class="icon">🧮</span> Calculadora con ponderación</div>
           <div id="notas-calc-list"></div>
@@ -310,7 +313,7 @@
 
     <!-- ── ESCALA ── -->
     <div class="section" id="sec-escala">
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1.25rem;">
+      <div class="two-col" style="display:grid; grid-template-columns: 1fr 1fr; gap:1.25rem;">
         <div class="card">
           <div class="card-title"><span class="icon">📊</span> Escala de notas — Sistema chileno</div>
           <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1.25rem;">Referencia de calificación 1.0 – 7.0</p>
@@ -622,12 +625,17 @@ async function loadSemestres() {
   renderSemestres();
 }
 
+const openSemIds = new Set();
+
 function renderSemestres() {
   const container = document.getElementById('semestres-list');
   if (semestresData.length === 0) {
     container.innerHTML = '<div class="card" style="text-align:center; color:var(--muted); padding:2.5rem;">Aún no tienes semestres. ¡Agrega uno arriba! 📚</div>';
     return;
   }
+  // Guardar cuáles están abiertos antes de re-renderizar
+  semestresData.forEach(s => { if (document.getElementById('body-' + s.id)?.classList.contains('open')) openSemIds.add(String(s.id)); });
+  const openIds = openSemIds;
   container.innerHTML = semestresData.map(sem => `
     <div class="semestre-item" id="sem-${sem.id}">
       <div class="semestre-header" onclick="toggleSem('${sem.id}')">
@@ -637,7 +645,7 @@ function renderSemestres() {
           <button class="btn btn-red" style="padding:0.35rem 0.75rem;font-size:0.75rem;" onclick="event.stopPropagation();eliminarSemestre('${sem.id}')">Eliminar</button>
         </div>
       </div>
-      <div class="semestre-body" id="body-${sem.id}">
+      <div class="semestre-body${openIds.has(sem.id) ? ' open' : ''}" id="body-${sem.id}">
         <div id="asigs-${sem.id}">
           ${(sem.asignaturas||[]).map(asig => renderAsignatura(asig)).join('')}
         </div>
@@ -718,6 +726,7 @@ async function agregarSemestre() {
   document.getElementById('new-sem-name').value = '';
   data.asignaturas = [];
   semestresData.push(data);
+  openSemIds.add(String(data.id));
   renderSemestres();
 }
 
@@ -725,6 +734,7 @@ async function eliminarSemestre(id) {
   if (!confirm('¿Eliminar este semestre y todos sus ramos?')) return;
   await db.from('semestres').delete().eq('id', id);
   semestresData = semestresData.filter(s => s.id != id);
+  openSemIds.delete(String(id));
   renderSemestres();
 }
 
@@ -735,8 +745,8 @@ async function agregarAsignatura(semId) {
   if (error) { alert('Error: ' + error.message); return; }
   const sem = semestresData.find(s => s.id == semId);
   if (sem) { data.notas = []; sem.asignaturas = [...(sem.asignaturas || []), data]; }
+  openSemIds.add(String(semId));
   renderSemestres();
-  document.getElementById('body-' + semId)?.classList.add('open');
 }
 
 async function eliminarAsignatura(asigId, semId) {
@@ -744,8 +754,8 @@ async function eliminarAsignatura(asigId, semId) {
   await db.from('asignaturas').delete().eq('id', asigId);
   const sem = semestresData.find(s => s.id == semId);
   if (sem) sem.asignaturas = sem.asignaturas.filter(a => a.id != asigId);
+  openSemIds.add(String(semId));
   renderSemestres();
-  document.getElementById('body-' + semId)?.classList.add('open');
 }
 
 async function agregarNota(asigId, semId) {
@@ -759,8 +769,8 @@ async function agregarNota(asigId, semId) {
   const sem = semestresData.find(s => s.id == semId);
   const asig = sem?.asignaturas?.find(a => a.id == asigId);
   if (asig) { asig.notas = [...(asig.notas || []), data]; }
+  openSemIds.add(String(semId));
   renderSemestres();
-  document.getElementById('body-' + semId)?.classList.add('open');
 }
 
 async function eliminarNota(notaId, asigId, semId) {
@@ -769,8 +779,8 @@ async function eliminarNota(notaId, asigId, semId) {
   const sem = semestresData.find(s => s.id == semId);
   const asig = sem?.asignaturas?.find(a => a.id == asigId);
   if (asig) asig.notas = asig.notas.filter(n => n.id != notaId);
+  openSemIds.add(String(semId));
   renderSemestres();
-  document.getElementById('body-' + semId)?.classList.add('open');
 }
 </script>
 </body>
