@@ -234,32 +234,37 @@
   .proximas-list { display: flex; flex-direction: column; gap: 0.6rem; }
   .prox-item { display: flex; align-items: center; gap: 1rem; background: white; border-radius: var(--radius-sm); padding: 0.85rem 1.1rem; border: 1px solid var(--border); flex-wrap: wrap; }
   .prox-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .prox-dot.hoy { background: var(--danger); animation: pulse 1s infinite; }
-  .prox-dot.urgente { background: var(--warning); }
-  .prox-dot.normal { background: var(--primary); }
-  .prox-dot.pasada { background: var(--muted); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .prox-ramo { font-weight: 700; font-size: 0.85rem; min-width: 120px; }
   .prox-eval { font-size: 0.85rem; color: var(--muted); flex: 1; }
   .prox-fecha { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
   .prox-dias { padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
-  .prox-dias.hoy { background: #FEE2E2; color: #991B1B; }
-  .prox-dias.urgente { background: #FEF3C7; color: #92400E; }
-  .prox-dias.normal { background: var(--primary-light); color: var(--primary-dark); }
-  .prox-dias.pasada { background: #F3F4F6; color: var(--muted); }
 
   /* Calendario mensual */
   .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
   .cal-nav h3 { font-size: 1rem; font-weight: 700; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
   .cal-day-header { text-align: center; font-size: 0.72rem; font-weight: 700; color: var(--muted); padding: 0.4rem 0; text-transform: uppercase; }
-  .cal-day { min-height: 56px; border-radius: 6px; padding: 0.3rem; font-size: 0.8rem; background: white; border: 1px solid transparent; position: relative; }
-  .cal-day.other-month { opacity: 0.35; }
+  .cal-day { min-height: 64px; border-radius: 8px; padding: 0.35rem; font-size: 0.8rem; background: white; border: 2px solid transparent; position: relative; cursor: pointer; transition: border-color 0.15s; }
+  .cal-day:hover { border-color: var(--primary); }
+  .cal-day.other-month { opacity: 0.3; pointer-events: none; }
   .cal-day.today { border-color: var(--primary); background: var(--primary-light); }
-  .cal-day-num { font-weight: 600; font-size: 0.78rem; margin-bottom: 2px; }
-  .cal-event { background: var(--primary); color: white; border-radius: 3px; padding: 1px 4px; font-size: 0.65rem; font-weight: 600; margin-bottom: 1px; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .cal-event.urgente { background: var(--warning); }
-  .cal-event.hoy-ev { background: var(--danger); }
+  .cal-day.selected { border-color: var(--primary-dark); box-shadow: 0 0 0 2px var(--primary); }
+  .cal-day-num { font-weight: 600; font-size: 0.78rem; margin-bottom: 3px; }
+  .cal-event-dot { width: 100%; border-radius: 4px; padding: 2px 5px; font-size: 0.62rem; font-weight: 700; margin-bottom: 2px; color: white; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; }
+
+  /* Panel derecho calendario */
+  .cal-panel-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; }
+  .color-picker-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+  .color-opt { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s, border-color 0.15s; }
+  .color-opt:hover { transform: scale(1.15); }
+  .color-opt.selected { border-color: #1a1a2e; transform: scale(1.15); }
+  .eventos-lista { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; }
+  .evento-item { display: flex; align-items: center; gap: 0.75rem; background: #F9FAFB; border-radius: var(--radius-sm); padding: 0.65rem 0.9rem; border: 1px solid var(--border); }
+  .evento-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .evento-desc { flex: 1; font-size: 0.85rem; font-weight: 600; }
+  .evento-fecha { font-size: 0.75rem; color: var(--muted); }
+  .evento-del { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; font-weight: 700; padding: 0 0.2rem; }
 
   @media (max-width: 600px) {
     .app-main { padding: 1rem; }
@@ -468,11 +473,8 @@
 
     <!-- ── CALENDARIO ── -->
     <div class="section" id="sec-calendario">
-      <div class="card" style="margin-bottom:1.25rem;">
-        <div class="card-title"><span class="icon">⚡</span> Próximas evaluaciones</div>
-        <div id="proximas-list"><div style="color:var(--muted);font-size:0.9rem;">Cargando...</div></div>
-      </div>
-      <div class="two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+      <div class="two-col" style="display:grid;grid-template-columns:1.3fr 1fr;gap:1.25rem;align-items:start;">
+        <!-- Calendario -->
         <div class="card">
           <div class="cal-nav">
             <button class="btn btn-outline" style="padding:0.4rem 0.75rem;" onclick="calPrev()">‹</button>
@@ -480,35 +482,43 @@
             <button class="btn btn-outline" style="padding:0.4rem 0.75rem;" onclick="calNext()">›</button>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
+          <p style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;text-align:center;">Haz click en un día para agregar o ver eventos</p>
         </div>
+        <!-- Panel derecho -->
         <div class="card">
-          <div class="card-title"><span class="icon">📝</span> Agregar fecha a evaluación</div>
-          <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">Selecciona un ramo y una nota/evaluación para asignarle una fecha.</p>
-          <div style="display:flex;flex-direction:column;gap:0.85rem;">
-            <div>
-              <label class="field-label">Semestre</label>
-              <select id="cal-sem-sel" onchange="calCargarRamos()" style="width:100%">
-                <option value="">-- Selecciona semestre --</option>
-              </select>
+          <div id="cal-panel-add">
+            <div class="cal-panel-title">📌 <span id="cal-panel-fecha-label">Selecciona un día</span></div>
+            <div id="cal-panel-form" style="display:none;">
+              <div class="modal-field" style="margin-bottom:0.85rem;">
+                <label class="field-label">Descripción del evento</label>
+                <input type="text" id="cal-ev-desc" placeholder="Ej: Prueba Síntesis 1" style="width:100%;">
+              </div>
+              <div class="modal-field" style="margin-bottom:0.85rem;">
+                <label class="field-label">Color</label>
+                <div class="color-picker-row" id="color-picker-row">
+                  <div class="color-opt selected" style="background:#6C63FF" data-color="#6C63FF" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#E24B4A" data-color="#E24B4A" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#EF9F27" data-color="#EF9F27" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#00C896" data-color="#00C896" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#3B82F6" data-color="#3B82F6" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#EC4899" data-color="#EC4899" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#8B5CF6" data-color="#8B5CF6" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#14B8A6" data-color="#14B8A6" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#F97316" data-color="#F97316" onclick="selColor(this)"></div>
+                  <div class="color-opt" style="background:#1a1a2e" data-color="#1a1a2e" onclick="selColor(this)"></div>
+                </div>
+              </div>
+              <button class="btn btn-purple" style="width:100%;margin-top:0.5rem;" onclick="guardarEvento()">Guardar evento</button>
+              <div id="cal-ev-msg" style="font-size:0.82rem;display:none;padding:0.5rem;border-radius:6px;margin-top:0.5rem;"></div>
             </div>
-            <div>
-              <label class="field-label">Ramo</label>
-              <select id="cal-ramo-sel" onchange="calCargarNotas()" style="width:100%">
-                <option value="">-- Selecciona ramo --</option>
-              </select>
+            <p id="cal-panel-hint" style="font-size:0.85rem;color:var(--muted);">Haz click en cualquier día del calendario para agregar un evento con color y descripción.</p>
+          </div>
+          <!-- Lista de todos los eventos -->
+          <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem;">
+            <div style="font-size:0.85rem;font-weight:700;margin-bottom:0.75rem;">📋 Todos los eventos</div>
+            <div class="eventos-lista" id="eventos-lista">
+              <div style="color:var(--muted);font-size:0.82rem;">Sin eventos aún.</div>
             </div>
-            <div>
-              <label class="field-label">Evaluación</label>
-              <select id="cal-nota-sel" style="width:100%">
-                <option value="">-- Selecciona evaluación --</option>
-              </select>
-            </div>
-            <div>
-              <label class="field-label">Fecha</label>
-              <input type="date" id="cal-fecha" style="width:100%">
-            </div>
-            <button class="btn btn-purple" onclick="guardarFechaEval()">Guardar fecha</button>
-            <div id="cal-msg" style="font-size:0.85rem;display:none;padding:0.5rem;border-radius:6px;"></div>
           </div>
         </div>
       </div>
@@ -634,7 +644,7 @@ function showSection(id) {
   document.getElementById('sec-' + id).classList.add('active');
   event.currentTarget.classList.add('active');
   if (id === 'asistencia') renderAsistencia();
-  if (id === 'calendario') { renderCalendario(); renderProximas(); calCargarSelectores(); }
+  if (id === 'calendario') { renderCalendario(); loadEventos(); }
 }
 
 // ══════════════ CALCULADORA ══════════════
@@ -1042,118 +1052,105 @@ function guardarConfig(asigId) {
 }
 
 // ══════════════ CALENDARIO ══════════════
-let calYear, calMonth;
+let calYear, calMonth, calSelectedDate = null, calColorSel = '#6C63FF';
+let eventosData = []; // { id, fecha, descripcion, color }
 
 function initCal() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
 function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendario(); }
 function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendario(); }
 
-function getAllEvals() {
-  const evals = [];
-  semestresData.forEach(sem => (sem.asignaturas||[]).forEach(asig => (asig.notas||[]).forEach(n => {
-    if (n.fecha_evaluacion) evals.push({ ...n, ramoNombre: asig.nombre, semNombre: sem.nombre });
-  })));
-  return evals.sort((a,b) => new Date(a.fecha_evaluacion) - new Date(b.fecha_evaluacion));
+function selColor(el) {
+  document.querySelectorAll('.color-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  calColorSel = el.dataset.color;
 }
 
-function diasRestantes(fechaStr) {
-  const hoy = new Date(); hoy.setHours(0,0,0,0);
+function calDiaClick(fechaStr) {
+  calSelectedDate = fechaStr;
   const fecha = new Date(fechaStr + 'T00:00:00');
-  return Math.round((fecha - hoy) / (1000*60*60*24));
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  document.getElementById('cal-panel-fecha-label').textContent = `${dias[fecha.getDay()]} ${fecha.getDate()} de ${meses[fecha.getMonth()]}`;
+  document.getElementById('cal-panel-form').style.display = 'block';
+  document.getElementById('cal-panel-hint').style.display = 'none';
+  document.getElementById('cal-ev-desc').value = '';
+  document.getElementById('cal-ev-msg').style.display = 'none';
+  renderCalendario();
 }
 
-function renderProximas() {
-  const evals = getAllEvals();
-  const container = document.getElementById('proximas-list');
-  if (evals.length === 0) { container.innerHTML = '<div style="color:var(--muted);font-size:0.9rem;padding:1rem 0;">No hay evaluaciones con fecha asignada aún. Usa la sección de abajo para agregar fechas. 📅</div>'; return; }
+async function loadEventos() {
+  const { data, error } = await db.from('eventos_calendario').select('*').eq('user_id', currentUser.id).order('fecha', { ascending: true });
+  if (!error) eventosData = data || [];
+  renderCalendario();
+  renderEventosLista();
+}
+
+async function guardarEvento() {
+  const desc = document.getElementById('cal-ev-desc').value.trim();
+  const msg = document.getElementById('cal-ev-msg');
+  if (!desc) { msg.textContent = 'Escribe una descripción.'; msg.style.display='block'; msg.style.background='#FEE2E2'; msg.style.color='#991B1B'; return; }
+  if (!calSelectedDate) return;
+  const { data, error } = await db.from('eventos_calendario').insert({ user_id: currentUser.id, fecha: calSelectedDate, descripcion: desc, color: calColorSel }).select().single();
+  if (error) { msg.textContent = 'Error: ' + error.message; msg.style.display='block'; msg.style.background='#FEE2E2'; msg.style.color='#991B1B'; return; }
+  eventosData.push(data);
+  eventosData.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  msg.textContent = '✅ Evento guardado.'; msg.style.display='block'; msg.style.background='#D1FAE5'; msg.style.color='#065F46';
+  document.getElementById('cal-ev-desc').value = '';
+  setTimeout(() => { msg.style.display='none'; }, 2500);
+  renderCalendario();
+  renderEventosLista();
+}
+
+async function eliminarEvento(id) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  await db.from('eventos_calendario').delete().eq('id', id);
+  eventosData = eventosData.filter(e => e.id !== id);
+  renderCalendario();
+  renderEventosLista();
+}
+
+function renderEventosLista() {
+  const lista = document.getElementById('eventos-lista');
+  if (eventosData.length === 0) { lista.innerHTML = '<div style="color:var(--muted);font-size:0.82rem;">Sin eventos aún.</div>'; return; }
   const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  container.innerHTML = '<div class="proximas-list">' + evals.map(ev => {
-    const dr = diasRestantes(ev.fecha_evaluacion);
-    const fecha = new Date(ev.fecha_evaluacion + 'T00:00:00');
-    const fechaStr = `${dias[fecha.getDay()]} ${fecha.getDate()} de ${meses[fecha.getMonth()]}`;
-    let tipo, dotCls, diasLabel;
-    if (dr === 0) { tipo = 'hoy'; diasLabel = '¡Es hoy!'; }
-    else if (dr < 0) { tipo = 'pasada'; diasLabel = `Hace ${Math.abs(dr)} día${Math.abs(dr)!==1?'s':''}`; }
-    else if (dr <= 3) { tipo = 'urgente'; diasLabel = `Faltan ${dr} día${dr!==1?'s':''}`; }
-    else { tipo = 'normal'; diasLabel = `Faltan ${dr} días`; }
-    dotCls = tipo;
-    return `<div class="prox-item">
-      <div class="prox-dot ${dotCls}"></div>
-      <div class="prox-ramo">${ev.ramoNombre}</div>
-      <div class="prox-eval">${ev.descripcion || 'Evaluación'} <span style="color:var(--primary);font-weight:700">${ev.ponderacion}%</span></div>
-      <div class="prox-fecha">${fechaStr}</div>
-      <div class="prox-dias ${tipo}">${diasLabel}</div>
+  lista.innerHTML = eventosData.map(ev => {
+    const f = new Date(ev.fecha + 'T00:00:00');
+    const fStr = `${dias[f.getDay()]} ${f.getDate()} ${meses[f.getMonth()]}`;
+    return `<div class="evento-item">
+      <div class="evento-color-dot" style="background:${ev.color}"></div>
+      <div class="evento-desc">${ev.descripcion}</div>
+      <div class="evento-fecha">${fStr}</div>
+      <button class="evento-del" onclick="eliminarEvento('${ev.id}')" title="Eliminar">✕</button>
     </div>`;
-  }).join('') + '</div>';
+  }).join('');
 }
 
 function renderCalendario() {
   if (calYear === undefined) initCal();
   const mesesNombres = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   document.getElementById('cal-title').textContent = `${mesesNombres[calMonth]} ${calYear}`;
-  const evals = getAllEvals();
   const evMap = {};
-  evals.forEach(ev => { const k = ev.fecha_evaluacion; if (!evMap[k]) evMap[k] = []; evMap[k].push(ev); });
+  eventosData.forEach(ev => { if (!evMap[ev.fecha]) evMap[ev.fecha] = []; evMap[ev.fecha].push(ev); });
   const hoy = new Date(); hoy.setHours(0,0,0,0);
   const firstDay = new Date(calYear, calMonth, 1);
   const lastDay = new Date(calYear, calMonth + 1, 0);
   const startDow = firstDay.getDay();
-  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  let html = dias.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+  const diasH = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  let html = diasH.map(d => `<div class="cal-day-header">${d}</div>`).join('');
   for (let i = 0; i < startDow; i++) html += `<div class="cal-day other-month"></div>`;
   for (let d = 1; d <= lastDay.getDate(); d++) {
     const fecha = new Date(calYear, calMonth, d);
     const isHoy = fecha.getTime() === hoy.getTime();
     const key = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isSel = calSelectedDate === key;
     const evs = evMap[key] || [];
-    const dr = diasRestantes(key);
-    html += `<div class="cal-day${isHoy?' today':''}">
+    html += `<div class="cal-day${isHoy?' today':''}${isSel?' selected':''}" onclick="calDiaClick('${key}')">
       <div class="cal-day-num">${d}</div>
-      ${evs.map(ev => `<div class="cal-event${dr===0?' hoy-ev':dr<=3?' urgente':''}" title="${ev.ramoNombre}: ${ev.descripcion||'Evaluación'}">${ev.ramoNombre.substring(0,8)}</div>`).join('')}
+      ${evs.map(ev => `<div class="cal-event-dot" style="background:${ev.color}" title="${ev.descripcion}">${ev.descripcion.substring(0,10)}</div>`).join('')}
     </div>`;
   }
   document.getElementById('cal-grid').innerHTML = html;
-}
-
-function calCargarSelectores() {
-  const semSel = document.getElementById('cal-sem-sel');
-  semSel.innerHTML = '<option value="">-- Selecciona semestre --</option>' + semestresData.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
-  document.getElementById('cal-ramo-sel').innerHTML = '<option value="">-- Selecciona ramo --</option>';
-  document.getElementById('cal-nota-sel').innerHTML = '<option value="">-- Selecciona evaluación --</option>';
-}
-
-function calCargarRamos() {
-  const semId = document.getElementById('cal-sem-sel').value;
-  const sem = semestresData.find(s => s.id == semId);
-  const ramoSel = document.getElementById('cal-ramo-sel');
-  ramoSel.innerHTML = '<option value="">-- Selecciona ramo --</option>';
-  document.getElementById('cal-nota-sel').innerHTML = '<option value="">-- Selecciona evaluación --</option>';
-  if (sem) ramoSel.innerHTML += (sem.asignaturas||[]).map(a => `<option value="${a.id}">${a.nombre}</option>`).join('');
-}
-
-function calCargarNotas() {
-  const semId = document.getElementById('cal-sem-sel').value;
-  const asigId = document.getElementById('cal-ramo-sel').value;
-  const sem = semestresData.find(s => s.id == semId);
-  const asig = sem?.asignaturas?.find(a => a.id == asigId);
-  const notaSel = document.getElementById('cal-nota-sel');
-  notaSel.innerHTML = '<option value="">-- Selecciona evaluación --</option>';
-  if (asig) notaSel.innerHTML += (asig.notas||[]).map(n => `<option value="${n.id}">${n.descripcion||'Nota '+n.nota} (${n.ponderacion}%)</option>`).join('');
-}
-
-async function guardarFechaEval() {
-  const notaId = document.getElementById('cal-nota-sel').value;
-  const fecha = document.getElementById('cal-fecha').value;
-  const msg = document.getElementById('cal-msg');
-  if (!notaId || !fecha) { msg.textContent = 'Selecciona una evaluación y una fecha.'; msg.style.display='block'; msg.style.background='#FEE2E2'; msg.style.color='#991B1B'; return; }
-  const { error } = await db.from('notas').update({ fecha_evaluacion: fecha }).eq('id', notaId);
-  if (error) { msg.textContent = 'Error: ' + error.message; msg.style.display='block'; msg.style.background='#FEE2E2'; msg.style.color='#991B1B'; return; }
-  // Update local
-  for (const s of semestresData) for (const a of (s.asignaturas||[])) { const n = (a.notas||[]).find(x => x.id == notaId); if (n) { n.fecha_evaluacion = fecha; break; } }
-  msg.textContent = '✅ Fecha guardada correctamente.'; msg.style.display='block'; msg.style.background='#D1FAE5'; msg.style.color='#065F46';
-  renderCalendario(); renderProximas();
-  setTimeout(() => { msg.style.display='none'; }, 3000);
 }
 
 initCal();
