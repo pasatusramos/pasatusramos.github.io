@@ -377,6 +377,50 @@
     .asist-sim-row { flex-wrap: wrap; }
   }
 
+
+  /* ── SUGERENCIAS ── */
+  .suggest-btn {
+    position: fixed; left: 0; top: 50%; transform: translateY(-50%) rotate(-90deg);
+    transform-origin: left center;
+    background: linear-gradient(135deg, #6C63FF, #00C896);
+    color: white; border: none; padding: 0.6rem 1.25rem;
+    border-radius: 0 0 10px 10px; font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; z-index: 1000; letter-spacing: 0.05em;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    transition: opacity 0.2s; white-space: nowrap;
+  }
+  .suggest-btn:hover { opacity: 0.9; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 2000;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 18px; padding: 2rem;
+    width: 100%; max-width: 420px; margin: 1rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .modal-box h3 { font-size: 1.15rem; font-weight: 800; margin-bottom: 0.4rem; color: #1a1a2e; }
+  .modal-box p { font-size: 0.85rem; color: #6B7280; margin-bottom: 1rem; }
+  .modal-box textarea {
+    width: 100%; border: 1.5px solid #E5E7EB; border-radius: 10px;
+    padding: 0.75rem; font-size: 0.9rem; resize: vertical; min-height: 110px;
+    outline: none; font-family: inherit; color: #1a1a2e;
+    transition: border 0.2s;
+  }
+  .modal-box textarea:focus { border-color: #6C63FF; }
+  .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; justify-content: flex-end; }
+  .modal-msg { font-size: 0.82rem; margin-top: 0.6rem; text-align: center; min-height: 1.2em; }
+  .modal-msg.ok { color: #065F46; }
+  .modal-msg.err { color: #991B1B; }
+
+  /* Ver sugerencias (solo admin) */
+  .suggest-list { margin-top: 1rem; max-height: 260px; overflow-y: auto; }
+  .suggest-item { background: #F5F6FA; border-radius: 8px; padding: 0.65rem 0.9rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+  .suggest-item .s-date { font-size: 0.72rem; color: #9CA3AF; margin-top: 0.25rem; }
+
 </style>
 </head>
 <body>
@@ -1258,5 +1302,88 @@ function renderCalendario() {
 
 initCal();
 </script>
+
+  <!-- ── BOTÓN SUGERENCIAS ── -->
+  <button class="suggest-btn" onclick="abrirSugerencia()">💡 Sugerencias</button>
+
+  <!-- Modal sugerencia -->
+  <div class="modal-overlay" id="modal-sugerencia" onclick="cerrarSiAfuera(event)">
+    <div class="modal-box">
+      <h3>💡 ¿Tienes una idea?</h3>
+      <p>Cuéntanos cómo mejorar <strong>Pasa tus Ramos</strong>. Tu opinión nos ayuda a crecer 🚀</p>
+      <textarea id="sugerencia-texto" placeholder="Escribe tu sugerencia aquí... Ej: Me gustaría que hubiera un modo oscuro, o que se pudiera exportar las notas en PDF..."></textarea>
+      <div class="modal-msg" id="sugerencia-msg"></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="cerrarSugerencia()">Cancelar</button>
+        <button class="btn btn-purple" id="btn-enviar-sug" onclick="enviarSugerencia()">Enviar 💌</button>
+      </div>
+      <!-- Panel admin: ver sugerencias -->
+      <div id="panel-admin" style="display:none; margin-top:1.25rem; border-top:1px solid #E5E7EB; padding-top:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+          <strong style="font-size:0.85rem;">📋 Sugerencias recibidas</strong>
+          <button class="btn btn-outline" style="font-size:0.75rem;padding:0.3rem 0.7rem;" onclick="cargarSugerencias()">Actualizar</button>
+        </div>
+        <div class="suggest-list" id="suggest-list">Cargando...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const ADMIN_ID = '872b7bff-802c-4374-8a4d-56021318599a';
+
+  function abrirSugerencia() {
+    document.getElementById('modal-sugerencia').classList.add('open');
+    document.getElementById('sugerencia-texto').value = '';
+    document.getElementById('sugerencia-msg').textContent = '';
+    // Mostrar panel admin si es el dueño
+    if (currentUser && currentUser.id === ADMIN_ID) {
+      document.getElementById('panel-admin').style.display = 'block';
+      cargarSugerencias();
+    }
+  }
+
+  function cerrarSugerencia() {
+    document.getElementById('modal-sugerencia').classList.remove('open');
+  }
+
+  function cerrarSiAfuera(e) {
+    if (e.target.id === 'modal-sugerencia') cerrarSugerencia();
+  }
+
+  async function enviarSugerencia() {
+    const texto = document.getElementById('sugerencia-texto').value.trim();
+    const msg = document.getElementById('sugerencia-msg');
+    if (!texto) { msg.textContent = 'Escribe algo antes de enviar 😊'; msg.className = 'modal-msg err'; return; }
+
+    const btn = document.getElementById('btn-enviar-sug');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+
+    const { error } = await db.from('sugerencias').insert({ mensaje: texto });
+
+    btn.disabled = false; btn.textContent = 'Enviar 💌';
+    if (error) {
+      msg.textContent = 'Error al enviar. Intenta de nuevo.'; msg.className = 'modal-msg err';
+    } else {
+      msg.textContent = '¡Gracias por tu sugerencia! 🎉'; msg.className = 'modal-msg ok';
+      document.getElementById('sugerencia-texto').value = '';
+      setTimeout(cerrarSugerencia, 2000);
+    }
+  }
+
+  async function cargarSugerencias() {
+    const lista = document.getElementById('suggest-list');
+    lista.innerHTML = 'Cargando...';
+    const { data, error } = await db.from('sugerencias').select('*').order('created_at', { ascending: false });
+    if (error || !data) { lista.innerHTML = '<p style="color:#991B1B;font-size:0.82rem;">No se pudieron cargar.</p>'; return; }
+    if (data.length === 0) { lista.innerHTML = '<p style="color:#6B7280;font-size:0.82rem;">Aún no hay sugerencias.</p>'; return; }
+    lista.innerHTML = data.map(s => `
+      <div class="suggest-item">
+        <div>${s.mensaje}</div>
+        <div class="s-date">${new Date(s.created_at).toLocaleString('es-CL')}</div>
+      </div>
+    `).join('');
+  }
+  </script>
+
 </body>
 </html>
